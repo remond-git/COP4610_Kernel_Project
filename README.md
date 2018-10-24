@@ -3,7 +3,7 @@
 Project 2 for Sys Op
 
 Group Members:
-John Sanchez
+June Sanchez
 Andrew Stringfellow
 Emmanuel Gonzalez
 
