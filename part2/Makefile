@@ -1,5 +1,5 @@
 ifneq ($(KERNELRELEASE),)
-	obj-m := xtime.o
+	obj-m := my_xtime.o
 else
 	KERNELDIR ?= /lib/modules/$(shell uname -r)/build/
 	PWD := $(shell pwd)

@@ -9,7 +9,7 @@
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Display the value of xtime on each proc read.");
 
-#define MODULE_NAME "xtime"
+#define MODULE_NAME "timed"
 #define MODULE_PERMISSIONS 0644
 #define MODULE_PARENT NULL
 #define STRING_LENGTH 256
@@ -19,8 +19,12 @@ static char *message1;
 static char *message2;
 static int readProc;
 static int procReadNumber = 0;
-static long time;
 struct timespec currentTime;
+
+static struct Time {
+    long seconds;
+    long nanoseconds;
+} time;
 
 int OpenProc(struct inode *sp_inode, struct file *sp_file) {
     printk(KERN_INFO "OpenProc() called.\n");
@@ -37,14 +41,16 @@ int OpenProc(struct inode *sp_inode, struct file *sp_file) {
     }
     
     currentTime = current_kernel_time();
-    sprintf(message1, "Current time: %ld\n", currentTime.tv_sec);
+    sprintf(message1, "Current time: %ld.%ld\n", currentTime.tv_sec, currentTime.tv_nsec);
 
     if (procReadNumber > 1) {
-        sprintf(message2, "Elapsed time: %ld\n", currentTime.tv_sec - time);
+
+        sprintf(message2, "Elapsed time: %ld.%ld\n", currentTime.tv_sec - time.seconds, currentTime.tv_nsec - time.nanoseconds);
         strcat(message1, message2);
     }
 
-    time = currentTime.tv_sec;
+    time.seconds = currentTime.tv_sec;
+    time.nanoseconds = currentTime.tv_nsec;
     
     return 0;
 }
