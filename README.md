@@ -1,10 +1,8 @@
-# cop4610_proj2
+# COP 4610: Project 2
 
-Project 2 for Sys Op
+##### Due date: Sunday, November 4 at 11:59 PM
 
-Group Members:
-June Sanchez
-Andrew Stringfellow
-Emmanuel Gonzalez
-
-Main repo for the project.  Due Date: Sunday, Nov 4 @ Midnight
+- Group members:
+  - June Sanchez
+  - Andrew Stringfellow
+  - Emmanuel Gonzalez
