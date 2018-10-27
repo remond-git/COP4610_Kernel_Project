@@ -1,8 +1,8 @@
 ifneq ($(KERNELRELEASE),)
-	obj-m := timed.o
+	obj-m := xtime.o
 else
-	KERNELDIR ?= /lib/modules/`uname -r`/build/
-	PWD := `pwd`
+	KERNELDIR ?= /lib/modules/$(shell uname -r)/build/
+	PWD := $(shell pwd)
 default:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
 endif
