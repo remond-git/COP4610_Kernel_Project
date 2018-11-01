@@ -26,7 +26,7 @@ struct queueEntries {
 struct list_head passengerQueue[numFloors];
 struct list_head elevList;
 
-extern int stop_;
+extern int stop_s;
 extern int mainDirection;
 extern int nextDirection;
 extern int currFloor;
@@ -40,6 +40,47 @@ extern int passengersServFloor[numFloors];
 extern struct task_struct* elevator_thread;
 extern struct mutex passengerQueueMutex;
 extern struct mutex elevatorListMutex;
+
+extern long (*STUB_start_elevator)(void);
+  long start_elevator(void) {
+  if(stop_s) {
+    stop_s = 0;
+    return 0;
+  }
+  else if(mainDirection == OFFLINE) {
+    printk("Starting elevator\n");
+    mainDirection = IDLE;
+    return 0;
+  }
+  else {
+    return 1;
+  }
+}
+
+extern long (*STUB_issue_request)(int,int,int);
+  long issue_request(int passenger_type, int start_floor, int destination_floor) {
+  printk("New request: %d, %d => %d\n", passenger_type, start_floor, destination_floor);
+  if(start_floor == destination_floor) {
+    passengersServiced++;
+    passengersServFloor[start_floor - 1]++;
+  }
+  else {
+    queuePassenger(passenger_type, start_floor, destination_floor);
+  }
+  return 0;
+}
+
+extern long (*STUB_stop_elevator)(void);
+  long stop_elevator(void) {
+  printk("Stopping elevator\n");
+  if(stop_s) {
+    return 1;
+  }
+  else {
+    stop_s = 1
+  }
+  return 0;
+}
 
 /*void createElevSyscalls(void) {
   issueRequest = &issueRequest;
