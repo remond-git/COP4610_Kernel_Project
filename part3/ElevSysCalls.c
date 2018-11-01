@@ -41,7 +41,7 @@ extern struct task_struct* elevator_thread;
 extern struct mutex passengerQueueMutex;
 extern struct mutex elevatorListMutex;
 
-void createElevSyscalls(void) {
+/*void createElevSyscalls(void) {
   issueRequest = &issueRequest;
   startElevator = &startElevator;
   stopElevator = &stopElevator;
@@ -51,7 +51,7 @@ void removeElevSyscalls(void) {
   issueRequest = NULL;
   startElevator = NULL;
   stopElevator = NULL;
-}
+}*/
 
 void initQueue(void) {
   int i;
