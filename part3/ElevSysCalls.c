@@ -82,17 +82,17 @@ extern long (*STUB_stop_elevator)(void);
   return 0;
 }
 
-/*void createElevSyscalls(void) {
-  issueRequest = &issueRequest;
-  startElevator = &startElevator;
-  stopElevator = &stopElevator;
+void elevator_syscalls_create(void) {
+  STUB_issue_request = &(issue_request);
+  STUB_start_elevator = &(start_elevator);
+  STUB_stop_elevator = &(stop_elevator);
 }
 
-void removeElevSyscalls(void) {
-  issueRequest = NULL;
-  startElevator = NULL;
-  stopElevator = NULL;
-}*/
+void elevator_syscalls_remove(void) {
+  STUB_issue_request = NULL;
+  STUB_start_elevator = NULL;
+  STUB_stop_elevator = NULL;
+}
 
 void initQueue(void) {
   int i;
