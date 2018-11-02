@@ -160,7 +160,7 @@ int elevatorMove(int floor) {
   }
 }
 
-int elevatorRun(void* data) {
+int elevatorRun(void) {
   while(kthread_should_stop()) {
     if(mainDirection == IDLE) {
       nextDirection = UP;
