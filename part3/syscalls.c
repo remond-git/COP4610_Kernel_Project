@@ -149,3 +149,15 @@ int passengWeights(int type) {
   else
     return 0;
 }
+
+int elevatorMove(int floor) {
+  if(floor == currFloor) {
+    return 0;
+  }
+  else {
+    printk("Now moving floor to %d\n", floor);
+    ssleep(2);
+    currFloor = floor;
+    return 1;
+  }
+}
