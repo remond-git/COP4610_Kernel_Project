@@ -74,19 +74,9 @@ extern long (*STUB_stop_elevator)(void);
   long stop_elevator(void) {
   printk("Stopping elevator\n");
   if(stop_s) {
-    return 1;        if(currFloor == 1) {
-          nextDirection = UP;
-          mainDirection = UP;
-          nextFloor = currFloor + 1;
-        }
-        else {
-          nextFloor = currFloor - 1;
-        }
-
+    return 1;        
   }
-  else {
-    stop_s = 1
-  }
+  stop_s = 1;
   return 0;
 }
 
