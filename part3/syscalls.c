@@ -74,7 +74,15 @@ extern long (*STUB_stop_elevator)(void);
   long stop_elevator(void) {
   printk("Stopping elevator\n");
   if(stop_s) {
-    return 1;
+    return 1;        if(currFloor == 1) {
+          nextDirection = UP;
+          mainDirection = UP;
+          nextFloor = currFloor + 1;
+        }
+        else {
+          nextFloor = currFloor - 1;
+        }
+
   }
   else {
     stop_s = 1
@@ -160,4 +168,148 @@ int elevatorMove(int floor) {
     currFloor = floor;
     return 1;
   }
+}
+
+int elevatorRun(void* data) {
+  while(kthread_should_stop()) {
+    if(mainDirection == IDLE) {
+      nextDirection = UP;
+      if(ifLoad() && !stop_s) {
+	mainDirection = LOADING;
+      }
+      else {
+        mainDirection = UP;
+	nextFloor = currFloor + 1;
+      }
+    else if(mainDirection == UP) {
+      elevatorMove(nextFloor);
+      if(currFloor == numFloors) {
+        nextDirection = DOWN;
+	mainDirection = DOWN;
+      }
+      if((ifLoad() && !stop_s) || ifUnload()) {
+        mainDirection = LOADING;
+      }
+      else if(currFloor == numFloors) {
+	nextFloor = currFloor - 1;
+      }
+      else {
+	nextFloor = currFloor + 1;
+      }
+    }
+    else if(mainDirection == DOWN) {
+      elevatorMove(nextFloor);
+      if(currFloor == 1) {
+        nextDirection = UP;
+        mainDirection = UP;
+      }
+      if((/*elevListSize()*/ && stop_s) && currFloor == 1) {
+        mainDirection = OFFLINE;
+	stop_s = 0;
+	nextDirection = UP;
+      }
+      else if(currFloor == 1) {
+        nextFloor = currFloor + 1;
+      }
+      else {
+        nextFloor = currFloor - 1;
+      }
+    }
+    else if(mainDirection == LOADING) {
+      ssleep(1);
+      unloadPassengers();
+      while(ifLoad() && !stop_s) {
+	//load the single passenger(currFloor)
+      }
+      mainDirection = nextDirection;
+      if(mainDirection == DOWN) {
+        if(currFloor == 1) {
+	  nextDirection = UP;
+	  mainDirection = UP;
+	  nextFloor = currFloor + 1;
+	}
+	else {
+	  nextFloor = currFloor - 1;
+	}
+      }
+      else {
+	if(currFloor == numFloors) {
+          nextDirection = DOWN;
+          mainDirection = DOWN;
+          nextFloor = currFloor - 1;
+        }
+        else {
+          nextFloor = currFloor + 1;
+        }
+      }
+    }
+  }
+  return 0;
+}
+
+int ifLoad(void) {
+  struct queueEntries *entry;
+  struct list_head *pos;
+  mutex_lock_interruptible(&passengerQueueMutex);
+  list_for_each (pos, &passengerQueue[currFloor - 1]) {
+    entry = list_entry(pos, struct queueEntries, list);
+    if((passengWeights(entry->m_type) + elevWeight() <= 16) &&
+      ((entry->m_destFloor > currFloor && nextDirection == UP) ||
+      (entry->m_destFloor < currFloor && nextDirection == DOWN))) {
+        mutex_unlock(&passengerQueueMutex);
+        return 1;
+    }
+  }
+  mutex_unlock(&passengerQueueMutex);
+  return 0;
+}
+
+
+int ifUnload(void) {
+  struct queueEntries *entry;
+  struct list_head *pos;
+  if(/*elevListSize() == 8*/) {
+    return 0;
+  }
+  mutex_lock_interruptible(&elevatorListMutex);
+  list_for_each (pos, &elevList) {
+    entry = list_entry(pos, struct queueEntries, list);
+    if(entry->m_destFloor == currFloor) {
+      mutex_unlock(&elevatorListMutex);
+      return 1;
+    }
+  }
+  mutex_unlock(&elevatorListMutex);
+  return 0;
+}
+
+void unloadPassengers(void) {
+  struct queueEntries *entry;
+  struct list_head *pos, *q;
+  mutex_lock_interruptible(&elevatorListMutex);
+  list_for_each_safe(pos, q, &elevatorList)  {
+    entry = list_entry(pos, struct queueEntries, list);
+    if (entry->m_destFloor == currFloor)  {
+      printk("Unloaded Passenger!\n");
+      passengersServiced++;	
+      passengersServFloor[entry->m_startFloor - 1]++;
+      list_del(pos);
+      kfree(entry);
+    }
+  }
+  mutex_unlock(&elevatorListMutex);
+}
+
+int elevWeight(void)
+{
+  struct queueEntries* entry;
+  struct list_head* pos;
+  int weight = 0;
+  mutex_lock_interruptible(&elevatorListMutex);
+  list_for_each(pos, &elevator_list) {
+    entry = list_entry(pos, struct queueEntries, list);
+    weight += passengWeights(entry->m_type);
+  }
+  mutex_unlock(&elevatorListMutex);
+  return weight;
 }
