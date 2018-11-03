@@ -4,10 +4,10 @@
 
 
 
-#### Adding to Kernel Instructions:
+## Adding to Kernel Instructions:
 
 ### Files to modify (core kernel):
-##### – /usr/src/test_kernel/arch/x86/entry/syscalls/syscall_64.tbl
+#### – /usr/src/test_kernel/arch/x86/entry/syscalls/syscall_64.tbl
 
 Go to Line:342 and find System call table, add lines to system call table for system calls.
 
@@ -22,7 +22,7 @@ Go to Line:342 and find System call table, add lines to system call table for sy
 355 common stop_elevator sys_stop_elevator <-----
 
 
-##### – /usr/src/test_kernel/include/linux/syscalls.h
+#### – /usr/src/test_kernel/include/linux/syscalls.h
 
 At the end of the document add the function thingy like so:
 
@@ -36,7 +36,7 @@ At the end of the document add the function thingy like so:
 ● #endif
 
 
-##### – /usr/src/test_kernel/Makefile
+#### – /usr/src/test_kernel/Makefile
 
 Go to Line:953
 
