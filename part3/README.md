@@ -25,22 +25,20 @@ Go to Line:342 and find System call table, add lines to system call table for sy
 354 common issue_request sys_issue_request <----- <br />
 355 common stop_elevator sys_stop_elevator <----- <br />
  <br />
-  <br />
 #### – /usr/src/test_kernel/include/linux/syscalls.h 
  <br />
 At the end of the document add the function thingy like so: <br />
  <br />
  asmlinkage long sys_statx(int dfd, const char __user *path, unsigned flags, <br />
 ● unsigned mask, struct statx __user *buffer); <br />
-● <br />
+●
 ● asmlinkage long sys_issue_request(int passenger_type, int start_floor, int destination_floor); <----- <br />
 ● asmlinkage long sys_start_elevator(void) <------ <br />
 ● asmlinkage long sys_stop_elevator(void) <------- <br />
 ● <br />
 ● #endif <br />
- <br />
- <br />
-#### – /usr/src/test_kernel/Makefile <br />
+
+#### – /usr/src/test_kernel/Makefile
 <br />
 Go to Line:953 <br />
  <br />
