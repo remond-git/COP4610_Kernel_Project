@@ -6,6 +6,10 @@
 
 ## Adding to Kernel Instructions:
 
+### Module Files:
+#### Basically drop the whole folder under the test kernel like this:
+/usr/src/test_kernel/part3/
+
 ### Files to modify (core kernel):
 #### – /usr/src/test_kernel/arch/x86/entry/syscalls/syscall_64.tbl
 
