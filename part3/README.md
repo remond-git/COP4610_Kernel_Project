@@ -21,9 +21,9 @@ Go to Line:342 and find System call table, add lines to system call table for sy
 330 common pkey_alloc sys_pkey_alloc <br />
 331 common pkey_free sys_pkey_free <br />
 332 common statx sys_statx <br />
-353 common start_elevator sys_start_elevator  <----- <br />
-354 common issue_request sys_issue_request <----- <br />
-355 common stop_elevator sys_stop_elevator <----- <br />
+353 common start_elevator sys_start_elevator **<-----** <br />
+354 common issue_request sys_issue_request **<-----** <br />
+355 common stop_elevator sys_stop_elevator **<-----** <br />
  <br />
 #### – /usr/src/test_kernel/include/linux/syscalls.h 
  <br />
@@ -45,7 +45,7 @@ Go to Line:953 <br />
 Add the folder with the system call (part 3 or elevator or whatever we call it) to the directory list <br />
  <br />
 ifeq ($(KBUILD_EXTMOD),)                                           <br />
- core-y += kernel/ certs mm/ fs/ ipc/ security/ crypto/ block/ example3_syscall/ <-----------------
+ core-y += kernel/ certs mm/ fs/ ipc/ security/ crypto/ block/ example3_syscall/ **<-----------------**
  <br />
  vmlinux-dirs := $(patsubst %/,%,$(filter %/, $(init-y) $(init-m) \ <br />
  $(core-y) $(core-m) $(drivers-y) $(drivers-m) \ <br />
