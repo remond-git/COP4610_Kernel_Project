@@ -45,7 +45,7 @@ Go to Line:953 <br />
 Add the folder with the system call (part 3 or elevator or whatever we call it) to the directory list <br />
  <br />
 ifeq ($(KBUILD_EXTMOD),)                                           <br />
- core-y += kernel/ certs mm/ fs/ ipc/ security/ crypto/ block/ example3_syscall/ **<-----------------**
+ core-y += kernel/ certs mm/ fs/ ipc/ security/ crypto/ block/ example3_syscall/ **<--------**
  <br />
  vmlinux-dirs := $(patsubst %/,%,$(filter %/, $(init-y) $(init-m) \ <br />
  $(core-y) $(core-m) $(drivers-y) $(drivers-m) \ <br />
