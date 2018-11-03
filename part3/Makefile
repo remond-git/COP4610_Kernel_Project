@@ -2,7 +2,7 @@ MODULE_NAME = elevator
 PWD := $(shell pwd)
 
 #KDIR := /lib/modules/$(shell uname -r)/build
-KDIR := /lib/modules/4.2.0/build
+KDIR := /lib/modules/4.12.14/build
 ccflags-y += -I$(src)/include
 
 obj-y := src/sys_start_elevator.o
