@@ -30,13 +30,13 @@ Go to Line:342 and find System call table, add lines to system call table for sy
 At the end of the document add the function thingy like so: <br />
  <br />
  asmlinkage long sys_statx(int dfd, const char __user *path, unsigned flags, <br />
-● unsigned mask, struct statx __user *buffer); <br />
-●
-● asmlinkage long sys_issue_request(int passenger_type, int start_floor, int destination_floor); <----- <br />
-● asmlinkage long sys_start_elevator(void) <------ <br />
-● asmlinkage long sys_stop_elevator(void) <------- <br />
-● <br />
-● #endif <br />
+ unsigned mask, struct statx __user *buffer); <br />
+ 
+ asmlinkage long sys_issue_request(int passenger_type, int start_floor, int destination_floor); <----- <br />
+ asmlinkage long sys_start_elevator(void) <------ <br />
+ asmlinkage long sys_stop_elevator(void) <------- <br />
+  <br />
+ #endif <br />
 
 #### – /usr/src/test_kernel/Makefile
 <br />
