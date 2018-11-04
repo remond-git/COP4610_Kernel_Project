@@ -21,7 +21,7 @@ struct queueEntries {
   int m_type;
   int m_startFloor;
   int m_destFloor;
-}
+};
 
 struct list_head passengerQueue[numFloors];
 struct list_head elevList;
@@ -74,7 +74,7 @@ extern long (*STUB_stop_elevator)(void);
   long stop_elevator(void) {
   printk("Stopping elevator\n");
   if(stop_s) {
-    return 1;        
+    return 1;
   }
   stop_s = 1;
   return 0;
@@ -118,7 +118,7 @@ void queuePassenger(int type, int start, int end) {
 void PrintQueue(void) //prints the queue at each floor
 {
   struct list_head *pos;
-  struct queueEntry* entry;
+  struct queueEntries* entry;
   int currentPos = 0;
   int i = 0;
   printk("Passenger Queue:\n");
@@ -127,7 +127,7 @@ void PrintQueue(void) //prints the queue at each floor
   {
     printk("Floor: %d\n", i+1);
     list_for_each(pos, &passengerQueue[i]) {
-      entry = list_entry(pos, struct queueEntries, list); 
+      entry = list_entry(pos, struct queueEntries, list);
       printk("Queue pos: %d\nType: %d\nStart Floor: %d\nDest Floor: %d\n",
 	currentPos, entry->m_type, entry->m_startFloor,
 	entry->m_destFloor);
@@ -171,8 +171,9 @@ int elevatorRun(void) {
       }
       else {
         mainDirection = UP;
-	nextFloor = currFloor + 1;
+	      nextFloor = currFloor + 1;
       }
+    }
     else if(mainDirection == UP) {
       elevatorMove(nextFloor);
       if(currFloor == numFloors) {
@@ -195,7 +196,7 @@ int elevatorRun(void) {
         nextDirection = UP;
         mainDirection = UP;
       }
-      if((/*elevListSize()*/ && stop_s) && currFloor == 1) { //if reached bottom
+      if((elevListSize() && stop_s) && currFloor == 1) { //if reached bottom
         mainDirection = OFFLINE;
 	stop_s = 0;
 	nextDirection = UP;
@@ -216,20 +217,20 @@ int elevatorRun(void) {
       mainDirection = nextDirection;
       if(mainDirection == DOWN) {
         if(currFloor == 1) {
-	  nextDirection = UP;
-	  mainDirection = UP;
-	  nextFloor = currFloor + 1;
-	}
-	else {
-	  nextFloor = currFloor - 1;
-	}
+	         nextDirection = UP;
+	         mainDirection = UP;
+	         nextFloor = currFloor + 1;
+	      }
+	      else {
+	         nextFloor = currFloor - 1;
+	      }
       }
       else {
-	if(currFloor == numFloors) {
-          nextDirection = DOWN;
-          mainDirection = DOWN;
-          nextFloor = currFloor - 1;
-        }
+	       if(currFloor == numFloors) {
+           nextDirection = DOWN;
+           mainDirection = DOWN;
+           nextFloor = currFloor - 1;
+         }
         else {
           nextFloor = currFloor + 1;
         }
@@ -260,7 +261,7 @@ int ifLoad(void) { //if a load should happen when elevator is not at capacity an
 int ifUnload(void) { //checks if elevator should unload (passenger wants to get off)
   struct queueEntries *entry; //returns 1 if any passenger reached dest floor, 0 otherwise
   struct list_head *pos;
-  if(/*elevListSize() == 8*/) {
+  if(elevListSize() == 8) {
     return 0;
   }
   mutex_lock_interruptible(&elevatorListMutex);
@@ -279,11 +280,11 @@ void unloadPassengers(void) {
   struct queueEntries *entry;
   struct list_head *pos, *q;
   mutex_lock_interruptible(&elevatorListMutex);
-  list_for_each_safe(pos, q, &elevatorList)  {
+  list_for_each_safe(pos, q, &elevList)  {
     entry = list_entry(pos, struct queueEntries, list);
     if (entry->m_destFloor == currFloor)  { //unloads only if passenger is at correct floor
       printk("Unloaded Passenger!\n");
-      passengersServiced++;	
+      passengersServiced++;
       passengersServFloor[entry->m_startFloor - 1]++;
       list_del(pos);
       kfree(entry);
@@ -298,10 +299,28 @@ int elevWeight(void) //returns total weight of elevator
   struct list_head* pos;
   int weight = 0;
   mutex_lock_interruptible(&elevatorListMutex);
-  list_for_each(pos, &elevator_list) {
+  list_for_each(pos, &elevList) {
     entry = list_entry(pos, struct queueEntries, list);
     weight += passengWeights(entry->m_type);
   }
   mutex_unlock(&elevatorListMutex);
   return weight;
+}
+
+int elevListSize(void) {
+  struct queueEntries *entry;
+  struct list_head *pos;
+  int i = 0;
+  mutex_lock_interruptible(&elevatorListMutex);
+  list_for_each(pos, &elevList) {
+    entry = list_entry(pos, struct queueEntries, list);
+    if(entry->m_type == 2) {
+      i += 2;
+    }
+    else {
+      i++;
+    }
+  }
+  mutex_unlock(&elevatorListMutex);
+  return i;
 }
