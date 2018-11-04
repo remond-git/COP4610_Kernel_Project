@@ -20,6 +20,8 @@ static char *message2;
 static int readProc;
 static int procReadNumber = 0;
 struct timespec currentTime;
+long elapsedSeconds;
+long elapsedNanoseconds;
 
 static struct Time {
     long seconds;
@@ -43,9 +45,16 @@ int OpenProc(struct inode *sp_inode, struct file *sp_file) {
     currentTime = current_kernel_time();
     sprintf(message1, "Current time: %ld.%ld\n", currentTime.tv_sec, currentTime.tv_nsec);
 
-    if (procReadNumber > 1) {
+    if (currentTime.tv_nsec - time.nanoseconds < 0) {
+        elapsedSeconds = currentTime.tv_sec - time.seconds - 1;
+        elapsedNanoseconds = currentTime.tv_nsec - time.nanoseconds + 1000000000;
+    } else {
+        elapsedSeconds = currentTime.tv_sec - time.seconds;
+        elapsedNanoseconds = currentTime.tv_nsec - time.nanoseconds;
+    }
 
-        sprintf(message2, "Elapsed time: %ld.%ld\n", currentTime.tv_sec - time.seconds, currentTime.tv_nsec - time.nanoseconds);
+    if (procReadNumber > 1) {
+        sprintf(message2, "Elapsed time: %ld.%ld\n", elapsedSeconds, elapsedNanoseconds);
         strcat(message1, message2);
     }
 
