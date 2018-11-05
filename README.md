@@ -48,37 +48,37 @@ Known bugs & unfinished portions:
 
 Special considerations:
 
-==============================
-Report
-==============================
 
-==============================
-Problem Statement
-==============================
+###Report
 
-Part 1:
+
+
+###Problem Statement
+
+
+####Part 1:
 A small C program that makes 10 syscalls more than an empty program.
 
-Part 2:
+####Part 2:
 A kernel module that stores the time since the UNIX epoch (January 1, 1990). On the first proc read, only the value of xtime is stored. On all subsequent proc reads, the difference of the current and last xtime values is also stored.
 
-Part 3:
+####Part 3:
 A kernel module that utilizes new syscalls, threading, and locks to simulate an elevator scheduling algorithm.
 
-==============================
-Steps taken to solve Part 2
-==============================
+
+###Steps taken to solve Part 2
+
 1) Learned how to insert modules into the kernel.
 2) Noted the time differences in seconds and nanoseconds between two
 time intervals.
 
-==============================
-Steps taken to solve Part 3
-==============================
 
-==============================
-Division of Labor
-==============================
+###Steps taken to solve Part 3
+
+
+
+###Division of Labor
+
 
 Gonzalez:
 • 
