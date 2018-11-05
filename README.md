@@ -62,9 +62,9 @@ To remove the kernel module for Part 3: `$ sudo rmmod elevator`
   - The output is not written to the proc file correctly.
 
 ## Division of Labor
-- Gonzalez
+- Emmanuel Gonzalez
     - Added ...
-- Sanchez
+- John Sanchez
     - Added ...
-- Stringfellow
+- Andrew Stringfellow
     - Added ...
