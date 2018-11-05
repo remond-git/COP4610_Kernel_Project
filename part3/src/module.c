@@ -47,11 +47,11 @@ struct task_struct* elevator_thread;
 static struct file_operations fileOperations; // Points to proc file definitions.
 
 int OpenModule(struct inode *sp_inode, struct file *sp_file) {
-   printk(KERN_NOTICE "/proc/ called open\n");
+   printk(KERN_NOTICE "OpenModule Called\n");
    rp = 1;
    message = kmalloc(sizeof(char) * 2048, __GFP_RECLAIM | __GFP_IO | __GFP_FS);
    if(message == NULL) {
-     printk("Error: open");
+     printk("Error: OpenModule");
      return -ENOMEM;
    }
    return 0;
@@ -95,16 +95,17 @@ ssize_t ReadModule(struct file *sp_file, char __user *buff, size_t size, loff_t 
   numWeight = elevWeight();
   n = numWeight % 1;
   if (n) {
-    sprintf(message, "Main elevator direction: %s \nCurrent floor: %d \nNext floor: %d \nCurrent passengers: %d \nCurrent Weight: %d.5 units\nPassengers serviced: %d \n, Passengers waiting: %s \n", directionToString(mainDirection), currFloor, nextFloor, numWeight, numPassengers, passengersServiced, queueToString());
+    sprintf(message, "Main elevator direction: %s \nCurrent floor: %d \nNext floor: %d \nCurrent passengers: %d \nCurrent Weight: %d.5 units\nPassengers serviced: %d \n, Passengers waiting: %s \n",
+directionToString(mainDirection), currFloor, nextFloor, numWeight, numPassengers, passengersServiced, queueToString());
   } else {
-    sprintf(message, "Main elevator direction: %s\nCurrent floor: %d\nNext floor: %d\nCurrent passengers: %d\nCurrent Weight: %d units\nPassengers serviced: %d\n, Passengers waiting: %s\n", directionToString(mainDirection), currFloor, nextFloor, numWeight, numPassengers, passengersServiced, queueToString());
+    sprintf(message, "Main elevator direction: %s \nCurrent floor: %d\nNext floor: %d\nCurrent passengers: %d\nCurrent Weight: %d units\nPassengers serviced: %d\n, Passengers waiting: %s \n",
+directionToString(mainDirection), currFloor, nextFloor, numWeight, numPassengers, passengersServiced, queueToString());
   }
 
-  /*rp = !rp;
+  rp = !rp;
   if (rp) {
     return 0;
   }
-  */
 
   printk(KERN_NOTICE "ReadModule() called.\n");
   copy_to_user(buff, message, strlen(message));
@@ -133,6 +134,7 @@ static int InitializeModule(void) {
     nextFloor = 1;
     numPassengers = 0;
     numWeight = 0;
+    waitPassengers = 0;
     for(i = 0; i < 10; i++) {
       passengersServFloor[i] = 0;
     }
