@@ -1,19 +1,21 @@
 #include <linux/module.h> // Dynamic loading of modules into the kernel.
 #include <linux/init.h> // Macros for module initialization.
 #include <linux/proc_fs.h> // File system structure and calls.
-#include <linux/mutex.h>
-#include <linux/slab.h>
-#include <linux/kthread.h>
-#include <linux/uaccess.h>
-#include <syscalls.h>
+#include <linux/slab.h> // Memory allocation functions: kmalloc() and kfree().
+#include <linux/uaccess.h> // Memory copy.
+#include <linux/kthread.h> // Multi-threading functions.
+#include <linux/mutex.h> // Mutual exclusion/lock functions.
+#include <syscalls.h> // Function declarations.
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("An elevator simulator utilizing first-in, first-out scheduling.");
 
+// Used for proc file system.
 #define MODULE_NAME "elevator"
 #define MODULE_PERMISSIONS 0644
 #define MODULE_PARENT NULL
 
+// The possible states of the elevator.
 #define OFFLINE 0
 #define IDLE 1
 #define UP 2
