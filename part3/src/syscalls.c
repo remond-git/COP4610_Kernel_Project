@@ -126,7 +126,7 @@ void PrintQueue(void) { // Prints the queue at each floor.
     list_for_each(pos, &passengerQueue[i]) {
       entry = list_entry(pos, struct queueEntries, list);
       printk("Queue pos: %d\nType: %d\nStart Floor: %d\nDest Floor: %d\n", currentPos, entry->m_type, entry->m_startFloor, entry->m_destFloor);
-    ++currentPos;
+      ++currentPos;
     }
   i++;
   }
@@ -143,7 +143,7 @@ char* queueToString(void) {
   int passQueueWeight;
   int passQueueServed;
   int i = 0, pos = 0, odd = 0;
-  char str = "In the passenger queue:";
+  sprintf(str1,"In the passenger queue:\n");
   while (i < numFloors) {
     sprintf(str2, "Floor: %d\n", i);
     strcat(str1, str2);
@@ -187,65 +187,72 @@ int elevatorMove(int floor) {
 
 int elevatorRun(void *data) {
   while (kthread_should_stop()) { // Keeps running until thread should stop.
-    if(mainDirection == IDLE) {
-      nextDirection = UP;
-      if(ifLoad() && !stop_s) {
-        mainDirection = LOADING;
-      } else {
-        mainDirection = UP;
-        nextFloor = currFloor + 1;
-      }
-    } else if(mainDirection == UP) {
-      elevatorMove(nextFloor);
-      if (currFloor == numFloors) {
-        nextDirection = DOWN;
-        mainDirection = DOWN;
-      } if ((ifLoad() && !stop_s) || ifUnload()) {
-        mainDirection = LOADING;
-      } else if (currFloor == numFloors) {
-        nextFloor = currFloor - 1;
-      } else {
-        nextFloor = currFloor + 1;
-      }
-    } else if (mainDirection == DOWN) {
-      elevatorMove(nextFloor);
-      if (currFloor == 1) {
+    switch(mainDirection) {
+      case IDLE:
         nextDirection = UP;
-        mainDirection = UP;
-      }
-      if ((elevListSize() && stop_s) && currFloor == 1) { // If reached the bottom.
-        mainDirection = OFFLINE;
-        stop_s = 0;
-        nextDirection = UP;
-      } else if(currFloor == 1) {
-        nextFloor = currFloor + 1;
-      } else {
-        nextFloor = currFloor - 1;
-      }
-    } else if (mainDirection == LOADING) {
-      ssleep(1);
-      unloadPassengers();
-      while (ifLoad() && !stop_s) {
-        loadPassenger(currFloor);
-      }
-      mainDirection = nextDirection;
-      if (mainDirection == DOWN) {
-        if(currFloor == 1) {
-          nextDirection = UP;
+        if(ifLoad() && !stop_s) {
+          mainDirection = LOADING;
+        } else {
           mainDirection = UP;
           nextFloor = currFloor + 1;
-        } else {
-          nextFloor = currFloor - 1;
-	      }
-      } else {
-        if(currFloor == numFloors) {
+        }
+        break;
+      case UP:
+        elevatorMove(nextFloor);
+        if (currFloor == numFloors) {
           nextDirection = DOWN;
           mainDirection = DOWN;
+        } if ((ifLoad() && !stop_s) || ifUnload()) {
+          mainDirection = LOADING;
+        } else if (currFloor == numFloors) {
           nextFloor = currFloor - 1;
         } else {
           nextFloor = currFloor + 1;
         }
-      }
+        break;
+      case DOWN:
+        elevatorMove(nextFloor);
+        if (currFloor == 1) {
+          nextDirection = UP;
+          mainDirection = UP;
+        }
+        if ((!elevListSize() && stop_s) && currFloor == 1) { // If reached the bottom.
+          mainDirection = OFFLINE;
+          stop_s = 0;
+          nextDirection = UP;
+        } else if(currFloor == 1) {
+          nextFloor = currFloor + 1;
+        } else {
+          nextFloor = currFloor - 1;
+        }
+        break;
+      case LOADING:
+        ssleep(1);
+        unloadPassengers();
+        while (ifLoad() && !stop_s) {
+          loadPassenger(currFloor);
+        }
+        mainDirection = nextDirection;
+        if (mainDirection == DOWN) {
+          if (currFloor == 1) {
+            nextDirection = UP;
+            mainDirection = UP;
+            nextFloor = currFloor + 1;
+          } else {
+            nextFloor = currFloor - 1;
+          }
+        } else {
+          if (currFloor == numFloors) {
+            nextDirection = DOWN;
+            mainDirection = DOWN;
+            nextFloor = currFloor - 1;
+          } else {
+            nextFloor = currFloor + 1;
+          }
+        }
+        break;
+      default:
+        break;
     }
   }
   return 0;
@@ -254,6 +261,9 @@ int elevatorRun(void *data) {
 int ifLoad(void) { // If a load should happen when elevator is not at capacity and going in right direction.
   struct queueEntries *entry; // Returns 1 if entry should load, 0 otherwise.
   struct list_head *pos;
+  int limit = elevListSize();
+  if(limit == 8)
+    return 0;
   mutex_lock_interruptible(&passengerQueueMutex);
   list_for_each(pos, &passengerQueue[currFloor - 1]) {
     entry = list_entry(pos, struct queueEntries, list);
@@ -269,9 +279,6 @@ int ifLoad(void) { // If a load should happen when elevator is not at capacity a
 int ifUnload(void) { // Checks if elevator should unload (passenger wants to get off).
   struct queueEntries *entry; // Returns 1 if any passenger reached dest floor, 0 otherwise.
   struct list_head *pos;
-  if (elevListSize() == 8) {
-    return 0;
-  }
   mutex_lock_interruptible(&elevatorListMutex);
   list_for_each(pos, &elevList) {
     entry = list_entry(pos, struct queueEntries, list);
@@ -291,7 +298,6 @@ void unloadPassengers(void) {
   list_for_each_safe(pos, q, &elevList) {
     entry = list_entry(pos, struct queueEntries, list);
     if (entry->m_destFloor == currFloor) { // Unloads only if passenger is at correct floor.
-      printk("Unloaded Passenger!\n");
       passengersServiced++;
       passengersServFloor[entry->m_startFloor - 1]++;
       list_del(pos);
@@ -324,7 +330,7 @@ void loadPassenger(int floor) {
       return;
     }
   }
-  mutex_unlock(passengerQueueMutex);
+  mutex_unlock(&passengerQueueMutex);
 }
 
 int passengerQueueWeight(int floor) { // Returns the total weight of the floor.
