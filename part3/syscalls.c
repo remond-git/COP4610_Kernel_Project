@@ -325,6 +325,33 @@ int elevWeight(void) //returns total weight of elevator
   return weight;
 }
 
+/*
+void loadPassenger(int floor) {
+  int weight = elevWeight();
+  struct queueEntries *entry;
+  struct list_head *pos, *q;
+  int i = floor - 1;
+  mutex_lock_interruptible(&passengerQueueMutex);
+  list_for_each_safe(pos, q, &passenger_queue[i]) {
+    entry = list_entry(pos, struct queueEntries, list);
+    if((entry->m_startFloor == floor) && ((passengWeights(entry->m_type) + weight) <= 16)) {
+      struct queueEntries *n;
+      n = kmalloc(sizeof(struct queueEntries), kstuff);
+      n->m_type = entry->m_type;
+      n->startFloor = entry->startFloor;
+      n->destFloor = entry->destFloor;
+      mutex_lock_interruptible(&elevatorListMutex);
+      list_add_tail(&n->list, &elevList);
+      list_del(pos);
+      kfree(entry);
+      mutex_unlock(&elevListMutex);
+      mutex_unlock(&passengerQueueMutex);
+      return;
+    }
+  }
+  mutex_unlock(passengerQueueMutex);
+}*/
+
 int elevListSize(void) {
   struct queueEntries *entry;
   struct list_head *pos;
