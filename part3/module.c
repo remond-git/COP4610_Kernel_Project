@@ -44,7 +44,7 @@ struct task_struct* elevator_thread;
 
 static struct file_operations fileOperations; // Points to proc file definitions.
 
-static int OpenModule(void) {
+int OpenModule(struct inode *sp_inode, struct file *sp_file) {
    printk(KERN_NOTICE "/proc/ called open\n");
    rp = 1;
    message = kmalloc(sizeof(char) * 2048, __GFP_RECLAIM | __GFP_IO | __GFP_FS);
@@ -87,25 +87,22 @@ char *directionToString(int mainDirection) {
   return str;
 }
 
-static size_t ReadModule(struct file *sp_file, char __usr *buff, size_t size, loff_t *offset) {
-  int n, len;
+ssize_t ReadModule(struct file *sp_file, char __user *buff, size_t size, loff_t *offset) {
+  int n;
   numPassengers = elevListSize();
   numWeight = elevWeight();
   n = numWeight % 1;
   if (n) {
-    sprintf(message, "Main elevator direction: %s\nCurrent floor: %d\nNext floor: %d\nCurrent passengers: %d\nCurrent Weight: %d.5 units\n
-    Passengers serviced: %d\n, Passengers waiting: %s\n", directionToString(mainDirection), currFloor, nextFloor, numWeight, passengersServiced,
-    queueToString());
+    sprintf(message, "Main elevator direction: %s \nCurrent floor: %d \nNext floor: %d \nCurrent passengers: %d \nCurrent Weight: %d.5 units\nPassengers serviced: %d \n, Passengers waiting: %s \n", directionToString(mainDirection), currFloor, nextFloor, numWeight, numPassengers, passengersServiced, queueToString());
   } else {
-    sprintf(message, "Main elevator direction: %s\nCurrent floor: %d\nNext floor: %d\nCurrent passengers: %d\nCurrent Weight: %d units\n
-    Passengers serviced: %d\n, Passengers waiting: %s\n", directionToString(mainDirection), currFloor, nextFloor, numWeight, passengersServiced,
-    queueToString());
+    sprintf(message, "Main elevator direction: %s\nCurrent floor: %d\nNext floor: %d\nCurrent passengers: %d\nCurrent Weight: %d units\nPassengers serviced: %d\n, Passengers waiting: %s\n", directionToString(mainDirection), currFloor, nextFloor, numWeight, numPassengers, passengersServiced, queueToString());
   }
 
-  rp = !rp;
+  /*rp = !rp;
   if (rp) {
     return 0;
   }
+  */
 
   printk(KERN_NOTICE "ReadModule() called.\n");
   copy_to_user(buff, message, strlen(message));

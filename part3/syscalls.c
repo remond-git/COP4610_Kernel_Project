@@ -14,7 +14,7 @@
 #define DOWN 3
 #define LOADING 4
 
-extern int numFloors = 10;
+#define numFloors 10
 
 struct queueEntries {
   struct list_head list;
@@ -36,6 +36,8 @@ extern int numWeight;
 extern int waitPassengers;
 extern int passengersServiced;
 extern int passengersServFloor[numFloors];
+
+char *str;
 
 extern struct task_struct* elevator_thread;
 extern struct mutex passengerQueueMutex;
@@ -93,7 +95,7 @@ void elevator_syscalls_remove(void) {
 }
 
 void initQueue(void) {
-  int i;
+  int i = 0;
   while(i < numFloors) {
     INIT_LIST_HEAD(&passengerQueue[i]);
     i++;
@@ -139,6 +141,22 @@ void PrintQueue(void) //prints the queue at each floor
   printk("\n");
 }
 
+char* queueToString(void) {
+  /*struct queueEntries *entry;
+  struct list_head *pos;
+  char str[2048];
+
+  char* message;
+  int i = 0;
+  while(i < numFloors) {
+    sprintf(message, "Floor: %d\n", i);
+    strcat(str, message);
+    i++;
+  }*/
+  str = "Mew";
+  return str;
+}
+
 int passengWeights(int type) {
   if(type == 0)
     return 2;
@@ -162,7 +180,7 @@ int elevatorMove(int floor) {
   }
 }
 
-int elevatorRun(void) {
+int elevatorRun(void *data) {
   while(kthread_should_stop()) { //keeps running until thread should stop
     if(mainDirection == IDLE) {
       nextDirection = UP;
