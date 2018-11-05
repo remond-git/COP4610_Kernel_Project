@@ -133,7 +133,7 @@ void PrintQueue(void) //prints the queue at each floor
       printk("Queue pos: %d\nType: %d\nStart Floor: %d\nDest Floor: %d\n",
 	currentPos, entry->m_type, entry->m_startFloor,
 	entry->m_destFloor);
-	++currentPos;
+      ++currentPos;
     }
     i++;
   }
@@ -230,7 +230,7 @@ int elevatorRun(void *data) {
       ssleep(1);
       unloadPassengers();
       while(ifLoad() && !stop_s) {
-	//load the single passenger(currFloor)
+	loadPassenger(currFloor);
       }
       mainDirection = nextDirection;
       if(mainDirection == DOWN) {
@@ -311,21 +311,7 @@ void unloadPassengers(void) {
   mutex_unlock(&elevatorListMutex);
 }
 
-int elevWeight(void) //returns total weight of elevator
-{
-  struct queueEntries* entry;
-  struct list_head* pos;
-  int weight = 0;
-  mutex_lock_interruptible(&elevatorListMutex);
-  list_for_each(pos, &elevList) {
-    entry = list_entry(pos, struct queueEntries, list);
-    weight += passengWeights(entry->m_type);
-  }
-  mutex_unlock(&elevatorListMutex);
-  return weight;
-}
 
-/*
 void loadPassenger(int floor) {
   int weight = elevWeight();
   struct queueEntries *entry;
@@ -350,7 +336,21 @@ void loadPassenger(int floor) {
     }
   }
   mutex_unlock(passengerQueueMutex);
-}*/
+}
+
+int elevWeight(void) //returns total weight of elevator
+{
+  struct queueEntries* entry;
+  struct list_head* pos;
+  int weight = 0;
+  mutex_lock_interruptible(&elevatorListMutex);
+  list_for_each(pos, &elevList) {
+    entry = list_entry(pos, struct queueEntries, list);
+    weight += passengWeights(entry->m_type);
+  }
+  mutex_unlock(&elevatorListMutex);
+  return weight;
+}
 
 int elevListSize(void) {
   struct queueEntries *entry;
