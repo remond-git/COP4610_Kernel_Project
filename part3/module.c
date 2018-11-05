@@ -100,6 +100,25 @@ static void ExitModule(void) {
       printk("Elevator stopped...\n");
     }
 }
+/*
+
+static size_t ReadModule(struct file *sp_file, char __usr *buff, size_t size, loff_t *offset) {
+  int n, len;
+  numPassengers = elevListSize();
+  numWeight = elevWeight();
+  n = numWeight % 1;
+  if(n) {
+    sprintf(message, "Main elevator direction: %s\nCurrent floor: %d\nNext floor: %d\nCurrent passengers: %d\nCurrent Weight: %d.5 units\n
+    Passengers serviced: %d\n, Passengers waiting: %s\n", directionToString(mainDirection), currFloor, nextFloor, numWeight, passengersServiced,
+    queueToString());
+  }
+  else {
+    
+  }
+  printk(KERN_NOTICE "here's the elevator...");
+}
+
+*/
 
 module_init(InitializeModule);
 module_exit(ExitModule);
