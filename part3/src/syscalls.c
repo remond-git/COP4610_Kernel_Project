@@ -125,36 +125,51 @@ void PrintQueue(void) //prints the queue at each floor
   int i = 0;
   printk("Passenger Queue:\n");
   mutex_lock_interruptible(&passengerQueueMutex);
-  while(i < numFloors)
-  {
+  while(i < numFloors) {
     printk("Floor: %d\n", i+1);
     list_for_each(pos, &passengerQueue[i]) {
       entry = list_entry(pos, struct queueEntries, list);
       printk("Queue pos: %d\nType: %d\nStart Floor: %d\nDest Floor: %d\n",
 	currentPos, entry->m_type, entry->m_startFloor,
 	entry->m_destFloor);
-      ++currentPos;
-    }
-    i++;
+    ++currentPos;
+   }
+   i++;
   }
   mutex_unlock(&passengerQueueMutex);
   printk("\n");
 }
 
 char* queueToString(void) {
-  /*struct queueEntries *entry;
+  struct queueEntries *entry;
   struct list_head *pos;
-  char str[2048];
-
-  char* message;
-  int i = 0;
+  static char str1[2048];
+  static char str2[256];
+  int passQueueSize;
+  int passQueueWeight;
+  int passQueueServed;
+  int i = 0, pos = 0, odd = 0;
+  char str = "In the passenger queue:";
   while(i < numFloors) {
-    sprintf(message, "Floor: %d\n", i);
-    strcat(str, message);
+    sprintf(str2, "Floor: %d\n", i);
+    strcat(str1, str2);
+    passQueueSize = passengerQueueSize(i);
+    passQueueWeight = passengerQueueWeight(i);
+    passQueueServed = passengersServFloor[i-1];
+    odd = passQueueWeight % 2;
+    if(odd) {
+        sprintf(str2, "Number of passengers in the queue: %d, weight of the queue: %d.5\n\tPassengers served:%d",
+                passQueueSize, passQueueWeight/2, passQueueServed);
+    }
+    else {
+        sprintf(str2, "Number of passengers in the queue: %d, weight of the queue: %d\n\tPassengers served:%d",
+                passQueueSize, passQueueWeight/2, passQueueServed);
+    }
+    strcat(str1, str2);
     i++;
-  }*/
-  str = "Mew";
-  return str;
+  }
+  strcat(str1, "\n");
+  return str1;
 }
 
 int passengWeights(int type) {
@@ -338,8 +353,38 @@ void loadPassenger(int floor) {
   mutex_unlock(passengerQueueMutex);
 }
 
-int elevWeight(void) //returns total weight of elevator
-{
+int passengerQueueWeight(int floor) { //returns total weight of floor
+    struct queueEntries* entry;
+    struct list_head* pos;
+    int weight = 0;
+    mutex_lock_interruptible(&passengerQueueMutex);
+    list_for_each(pos, &passengerQueue[floor - 1]) {
+        entry = list_entry(pos, struct queueEntries, list);
+        weight += passengWeights(entry->m_type);
+    }
+    mutex_unlock(&passengerQueueMutex);
+    return weight;
+}
+
+int passengerQueueSize(int floor) { //returns total size of floor
+    struct queueEntries *entry;
+    struct list_head *pos;
+    int i = 0;
+    mutex_lock_interruptible(&passengerQueueMutex);
+    list_for_each(pos, &passengerQueue[floor -1]) {
+        entry = list_entry(pos, struct queueEntries, list);
+        if(entry->m_type == 2) {
+            i += 2;
+        }
+        else {
+            i++;
+        }
+    }
+    mutex_unlock(&passengerQueueMutex);
+    return i;
+}
+
+int elevWeight(void) { //returns total weight of elevator
   struct queueEntries* entry;
   struct list_head* pos;
   int weight = 0;
@@ -352,7 +397,7 @@ int elevWeight(void) //returns total weight of elevator
   return weight;
 }
 
-int elevListSize(void) {
+int elevListSize(void) { //returns total passengers of elevator
   struct queueEntries *entry;
   struct list_head *pos;
   int i = 0;
