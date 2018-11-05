@@ -55,6 +55,38 @@ static int OpenModule(void) {
    return 0;
 }
 
+char *directionToString(int mainDirection) {
+  static char str[32];
+
+  switch (mainDirection) {
+    case 0:
+      sprintf(str, "OFFLINE");
+      break;
+
+    case 1:
+      sprintf(str, "IDLE");
+      break;
+
+    case 2:
+      sprintf(str, "UP");
+      break;
+    
+    case 3:
+      sprintf(str, "DOWN");
+      break;
+
+    case 4:
+      sprintf(str, "LOADING");
+      break;
+  
+    default:
+      sprintf(str, "ERROR");
+      break;
+  }
+
+  return str;
+}
+
 static size_t ReadModule(struct file *sp_file, char __usr *buff, size_t size, loff_t *offset) {
   int n, len;
   numPassengers = elevListSize();
