@@ -310,6 +310,11 @@ void unloadPassengers(void) {
 }
 
 void loadPassenger(int floor) {
+  if (floor > 10 || floor < 1) {
+    printk(KERN_NOTICE "Error: Invalid Floor!");
+    return;
+  }
+
   int weight = elevWeight();
   struct queueEntries *entry;
   struct list_head *pos, *q;
