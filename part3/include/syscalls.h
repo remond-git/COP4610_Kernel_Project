@@ -12,8 +12,8 @@ int passengerQueueSize(int floor); //counts size in queue of floor
 int passengerQueueWeight(int floor); //counts total weight in queue of floor
 int elevatorMove(int floor);
 int elevWeight(void); //weight of elevator
-int elevSize(void);
-int elevatorRun(void); //Actually runs the elevator
+int elevListSize(void);
+int elevatorRun(void *data); //Actually runs the elevator
 int ifLoad(void); //If load should occur, returns 1 if true, returns 0 otherwise
 int ifUnload(void); //If unload should occur, returns 1 true, returns 0 otherwise
 void loadPassenger(int floor);
