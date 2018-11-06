@@ -9,11 +9,11 @@
 #define mallocFlags (__GFP_RECLAIM | __GFP_IO | __GFP_FS)
 
 // The possible states of the elevator.
-#define OFFLINE 0
-#define IDLE 1
-#define UP 2
-#define DOWN 3
-#define LOADING 4
+#define IDLE 0
+#define UP 1
+#define DOWN 2
+#define LOADING 3
+#define OFFLINE 4
 
 #define numFloors 10
 
@@ -48,6 +48,7 @@ extern long (*STUB_start_elevator)(void);
 long start_elevator(void) {
   if (stop_s) {
     stop_s = 0;
+    printk("stop_s\n");
     return 0;
   } else if (mainDirection == OFFLINE) {
     printk("Starting elevator\n");
@@ -72,7 +73,7 @@ long issue_request(int passenger_type, int start_floor, int destination_floor) {
 extern long (*STUB_stop_elevator)(void);
 long stop_elevator(void) {
   printk("Stopping elevator\n");
-  if (stop_s) {
+  if (stop_s == 1) {
     return 1;
   }
   stop_s = 1;
@@ -135,26 +136,24 @@ void PrintQueue(void) { // Prints the queue at each floor.
 }
 
 char* queueToString(void) {
-  struct queueEntries *entry;
-  struct list_head *pos;
   static char str1[2048];
   static char str2[256];
   int passQueueSize;
   int passQueueWeight;
   int passQueueServed;
-  int i = 0, pos = 0, odd = 0;
-  sprintf(str1,"In the passenger queue:\n");
+  int i = 0, odd = 0;
+  sprintf(str1,"\n\nIn the passenger queue:\n");
   while (i < numFloors) {
-    sprintf(str2, "Floor: %d\n", i);
+    sprintf(str2, "\nFloor: %d\n", i+1);
     strcat(str1, str2);
     passQueueSize = passengerQueueSize(i);
     passQueueWeight = passengerQueueWeight(i);
     passQueueServed = passengersServFloor[i-1];
     odd = passQueueWeight % 2;
     if (odd) {
-      sprintf(str2, "Number of passengers in the queue: %d, weight of the queue: %d.5\n\tPassengers served:%d", passQueueSize, passQueueWeight/2, passQueueServed);
+      sprintf(str2, "Number of passengers in the queue: %d\nWeight of the queue: %d.5\nPassengers served:%d\n", passQueueSize, passQueueWeight/2, passQueueServed);
     } else {
-      sprintf(str2, "Number of passengers in the queue: %d, weight of the queue: %d\n\tPassengers served:%d", passQueueSize, passQueueWeight/2, passQueueServed);
+      sprintf(str2, "Number of passengers in the queue: %d\nWeight of the queue: %d\nPassengers served:%d\n", passQueueSize, passQueueWeight/2, passQueueServed);
     }
     strcat(str1, str2);
     i++;
@@ -186,9 +185,11 @@ int elevatorMove(int floor) {
 }
 
 int elevatorRun(void *data) {
-  while (kthread_should_stop()) { // Keeps running until thread should stop.
-    switch(mainDirection) {
-      case IDLE:
+  while (!kthread_should_stop()) { // Keeps running until thread should stop.
+      if (mainDirection == OFFLINE) {
+
+      }
+      else if(mainDirection == IDLE) {
         nextDirection = UP;
         if(ifLoad() && !stop_s) {
           mainDirection = LOADING;
@@ -196,37 +197,41 @@ int elevatorRun(void *data) {
           mainDirection = UP;
           nextFloor = currFloor + 1;
         }
-        break;
-      case UP:
+      }
+      else if (mainDirection == UP) {
         elevatorMove(nextFloor);
-        if (currFloor == numFloors) {
+        if (currFloor == 10) {
           nextDirection = DOWN;
           mainDirection = DOWN;
         } if ((ifLoad() && !stop_s) || ifUnload()) {
           mainDirection = LOADING;
-        } else if (currFloor == numFloors) {
+        } else if (currFloor == 10) {
           nextFloor = currFloor - 1;
         } else {
           nextFloor = currFloor + 1;
         }
-        break;
-      case DOWN:
+      }
+      else if(mainDirection == DOWN) {
         elevatorMove(nextFloor);
         if (currFloor == 1) {
           nextDirection = UP;
           mainDirection = UP;
         }
-        if ((!elevListSize() && stop_s) && currFloor == 1) { // If reached the bottom.
+        if (stop_s && !elevListSize() && currFloor == 1) { // If reached the bottom.
           mainDirection = OFFLINE;
           stop_s = 0;
           nextDirection = UP;
-        } else if(currFloor == 1) {
+        } 
+	  else if((ifLoad() && !stop_s) || ifUnload()) {
+	  mainDirection = LOADING;
+	}
+	  else if(currFloor == 1) {
           nextFloor = currFloor + 1;
         } else {
           nextFloor = currFloor - 1;
         }
-        break;
-      case LOADING:
+      }
+      else if(mainDirection == LOADING) {
         ssleep(1);
         unloadPassengers();
         while (ifLoad() && !stop_s) {
@@ -242,7 +247,7 @@ int elevatorRun(void *data) {
             nextFloor = currFloor - 1;
           }
         } else {
-          if (currFloor == numFloors) {
+          if (currFloor == 10) {
             nextDirection = DOWN;
             mainDirection = DOWN;
             nextFloor = currFloor - 1;
@@ -250,10 +255,7 @@ int elevatorRun(void *data) {
             nextFloor = currFloor + 1;
           }
         }
-        break;
-      default:
-        break;
-    }
+      }
   }
   return 0;
 }
@@ -313,19 +315,19 @@ void loadPassenger(int floor) {
   struct list_head *pos, *q;
   int i = floor - 1;
   mutex_lock_interruptible(&passengerQueueMutex);
-  list_for_each_safe(pos, q, &passenger_queue[i]) {
+  list_for_each_safe(pos, q, &passengerQueue[i]) {
     entry = list_entry(pos, struct queueEntries, list);
     if ((entry->m_startFloor == floor) && ((passengWeights(entry->m_type) + weight) <= 16)) {
       struct queueEntries *n;
       n = kmalloc(sizeof(struct queueEntries), mallocFlags);
       n->m_type = entry->m_type;
-      n->startFloor = entry->startFloor;
-      n->destFloor = entry->destFloor;
+      n->m_startFloor = entry->m_startFloor;
+      n->m_destFloor = entry->m_destFloor;
       mutex_lock_interruptible(&elevatorListMutex);
       list_add_tail(&n->list, &elevList);
       list_del(pos);
       kfree(entry);
-      mutex_unlock(&elevListMutex);
+      mutex_unlock(&elevatorListMutex);
       mutex_unlock(&passengerQueueMutex);
       return;
     }

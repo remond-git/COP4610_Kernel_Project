@@ -16,11 +16,11 @@ MODULE_DESCRIPTION("An elevator simulator utilizing first-in, first-out scheduli
 #define MODULE_PARENT NULL
 
 // The possible states of the elevator.
-#define OFFLINE 0
-#define IDLE 1
-#define UP 2
-#define DOWN 3
-#define LOADING 4
+#define IDLE 0
+#define UP 1
+#define DOWN 2
+#define LOADING 3
+#define OFFLINE 4
 
 #define numFloors 10
 
@@ -61,23 +61,23 @@ char *directionToString(int mainDirection) {
   static char str[32];
 
   switch (mainDirection) {
-    case 0:
+    case OFFLINE:
       sprintf(str, "OFFLINE");
       break;
 
-    case 1:
+    case IDLE:
       sprintf(str, "IDLE");
       break;
 
-    case 2:
+    case UP:
       sprintf(str, "UP");
       break;
     
-    case 3:
+    case DOWN:
       sprintf(str, "DOWN");
       break;
 
-    case 4:
+    case LOADING:
       sprintf(str, "LOADING");
       break;
   
@@ -95,10 +95,10 @@ ssize_t ReadModule(struct file *sp_file, char __user *buff, size_t size, loff_t 
   numWeight = elevWeight();
   n = numWeight % 1;
   if (n) {
-    sprintf(message, "Main elevator direction: %s \nCurrent floor: %d \nNext floor: %d \nCurrent passengers: %d \nCurrent Weight: %d.5 units\nPassengers serviced: %d \n, Passengers waiting: %s \n",
+    sprintf(message, "Main elevator direction: %s \nCurrent floor: %d \nNext floor: %d \nCurrent passengers: %d \nCurrent Weight: %d.5 units\nPassengers serviced: %d \nPassengers waiting: %s \n",
 directionToString(mainDirection), currFloor, nextFloor, numWeight, numPassengers, passengersServiced, queueToString());
   } else {
-    sprintf(message, "Main elevator direction: %s \nCurrent floor: %d\nNext floor: %d\nCurrent passengers: %d\nCurrent Weight: %d units\nPassengers serviced: %d\n, Passengers waiting: %s \n",
+    sprintf(message, "Main elevator direction: %s \nCurrent floor: %d\nNext floor: %d\nCurrent passengers: %d\nCurrent Weight: %d units\nPassengers serviced: %d\nPassengers waiting: %s \n",
 directionToString(mainDirection), currFloor, nextFloor, numWeight, numPassengers, passengersServiced, queueToString());
   }
 
@@ -129,7 +129,7 @@ static int InitializeModule(void) {
 
     mainDirection = OFFLINE;  // initialize mainDirection
     nextDirection = UP;
-    stop_s = 1;
+    stop_s = 0;
     currFloor = 1;
     nextFloor = 1;
     numPassengers = 0;
@@ -164,6 +164,7 @@ static void ExitModule(void) {
     if(r != -EINTR) {
       printk("Elevator stopped...\n");
     }
+    
 }
 
 module_init(InitializeModule);
