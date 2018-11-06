@@ -59,12 +59,20 @@ To remove the kernel module for Part 3: `$ sudo rmmod elevator`
 
 ## Known Bugs and Unfinished Portions
 - Part 3
-  - The output is not written to the proc file correctly.
+  - If illegitimate passengers are added to the queue, the passengers get stuck in the elevator not wanting to get off.
+  - Sometimes during the stress test, the elevator randomly pauses before resuming operation.
+  - Sometimes the computer freezes after adding the module but then resumes.
 
 ## Division of Labor
 - Emmanuel Gonzalez
-    - Added ...
+    - Created the kernel module for Part 2.
+    - Created the listing functions.
 - John Sanchez
-    - Added ...
+    - Implemented elevator run function and mutexes.
+    - Added needed variables.
+    - Added structures to syscall file.
+    - Fixed the calculation of elapsed time for the kernel module in Part 2.
 - Andrew Stringfellow
-    - Added ...
+    - Set up the machine and compiled the kernel.
+    - Set up the module file.
+    - Fixed the calculation of elapsed time for the kernel module in Part 2.
