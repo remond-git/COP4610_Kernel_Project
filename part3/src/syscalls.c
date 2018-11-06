@@ -186,75 +186,76 @@ int elevatorMove(int floor) {
 
 int elevatorRun(void *data) {
   while (!kthread_should_stop()) { // Keeps running until thread should stop.
-      if (mainDirection == OFFLINE) {
-
-      }
-      else if(mainDirection == IDLE) {
-        nextDirection = UP;
-        if(ifLoad() && !stop_s) {
-          mainDirection = LOADING;
-        } else {
-          mainDirection = UP;
-          nextFloor = currFloor + 1;
-        }
-      }
-      else if (mainDirection == UP) {
-        elevatorMove(nextFloor);
-        if (currFloor == 10) {
-          nextDirection = DOWN;
-          mainDirection = DOWN;
-        } if ((ifLoad() && !stop_s) || ifUnload()) {
-          mainDirection = LOADING;
-        } else if (currFloor == 10) {
-          nextFloor = currFloor - 1;
-        } else {
-          nextFloor = currFloor + 1;
-        }
-      }
-      else if(mainDirection == DOWN) {
-        elevatorMove(nextFloor);
-        if (currFloor == 1) {
-          nextDirection = UP;
-          mainDirection = UP;
-        }
-        if (stop_s && !elevListSize() && currFloor == 1) { // If reached the bottom.
-          mainDirection = OFFLINE;
-          stop_s = 0;
-          nextDirection = UP;
-        } 
-	  else if((ifLoad() && !stop_s) || ifUnload()) {
-	  mainDirection = LOADING;
-	}
-	  else if(currFloor == 1) {
-          nextFloor = currFloor + 1;
-        } else {
-          nextFloor = currFloor - 1;
-        }
-      }
-      else if(mainDirection == LOADING) {
-        ssleep(1);
-        unloadPassengers();
-        while (ifLoad() && !stop_s) {
-          loadPassenger(currFloor);
-        }
-        mainDirection = nextDirection;
-        if (mainDirection == DOWN) {
-          if (currFloor == 1) {
-            nextDirection = UP;
-            mainDirection = UP;
-            nextFloor = currFloor + 1;
-          } else {
-            nextFloor = currFloor - 1;
-          }
-        } else {
-          if (currFloor == 10) {
-            nextDirection = DOWN;
-            mainDirection = DOWN;
-            nextFloor = currFloor - 1;
-          } else {
-            nextFloor = currFloor + 1;
-          }
-        }
+    switch(mainDirection) {
+	    case OFFLINE:
+	      break; 
+      	    case IDLE:
+              nextDirection = UP;
+              if(ifLoad() && !stop_s) {
+          	mainDirection = LOADING;
+              } else {
+          	mainDirection = UP;
+          	nextFloor = currFloor + 1;
+              }
+	      break;
+      	    case UP:
+              elevatorMove(nextFloor);
+              if (currFloor == 10) {
+                nextDirection = DOWN;
+                mainDirection = DOWN;
+              } if ((ifLoad() && !stop_s) || ifUnload()) {
+                mainDirection = LOADING;
+              } else if (currFloor == 10) {
+                nextFloor = currFloor - 1;
+              } else {
+                nextFloor = currFloor + 1;
+              }
+	      break;
+      	    case DOWN:
+              elevatorMove(nextFloor);
+              if (currFloor == 1) {
+                nextDirection = UP;
+                mainDirection = UP;
+              }
+              if (stop_s && !elevListSize() && currFloor == 1) { // If reached the bottom.
+                mainDirection = OFFLINE;
+                stop_s = 0;
+                nextDirection = UP;
+              } 
+	      else if((ifLoad() && !stop_s) || ifUnload()) {
+	        mainDirection = LOADING;
+	      }
+	      else if(currFloor == 1) {
+                nextFloor = currFloor + 1;
+              } else {
+                nextFloor = currFloor - 1;
+              }
+	      break;
+            case LOADING:
+              ssleep(1);
+              unloadPassengers();
+              while (ifLoad() && !stop_s) {
+                loadPassenger(currFloor);
+              }
+              mainDirection = nextDirection;
+              if (mainDirection == DOWN) {
+                if (currFloor == 1) {
+                  nextDirection = UP;
+                  mainDirection = UP;
+                  nextFloor = currFloor + 1;
+                } else {
+                  nextFloor = currFloor - 1;
+                }
+              } else {
+                if (currFloor == 10) {
+                  nextDirection = DOWN;
+                  mainDirection = DOWN;
+                  nextFloor = currFloor - 1;
+                } else {
+                  nextFloor = currFloor + 1;
+                }
+              }
+	      break;
       }
   }
   return 0;
